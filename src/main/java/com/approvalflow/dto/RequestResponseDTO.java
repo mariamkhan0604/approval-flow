@@ -22,6 +22,7 @@ public class RequestResponseDTO {
     private String description;
     private RequestStatus status;
     private String employeeId;
+    private String employeeName;  
     private String managerId;       // null if not yet acted on
     private LocalDateTime createdAt;
 }
