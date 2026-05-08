@@ -9,6 +9,7 @@ package com.approvalflow.model;
  */
 public enum RequestStatus {
     PENDING,
+    GROUP_APPROVAL_PENDING,
     APPROVED,
     REJECTED
 }

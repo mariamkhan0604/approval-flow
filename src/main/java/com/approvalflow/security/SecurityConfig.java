@@ -53,6 +53,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/requests/my").hasRole("EMPLOYEE")
                         .requestMatchers(HttpMethod.GET, "/requests").hasRole("MANAGER")
                         .requestMatchers(HttpMethod.GET, "/requests/stats").authenticated()
+                        .requestMatchers(HttpMethod.GET,  "/reviews/pending").hasRole("REVIEWER")
+                        .requestMatchers(HttpMethod.GET,  "/reviews/all").hasRole("REVIEWER")
+                        .requestMatchers(HttpMethod.POST, "/reviews/*/decision").hasRole("REVIEWER")
 
                         .anyRequest().authenticated()
                 )

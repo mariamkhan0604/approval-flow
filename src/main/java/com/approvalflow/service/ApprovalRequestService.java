@@ -29,7 +29,8 @@ import java.util.stream.Collectors;
 public class ApprovalRequestService {
 
     private final ApprovalRequestRepository requestRepository;
-    private final UserRepository userRepository;   // ← added
+    private final UserRepository userRepository;
+    private final GroupApprovalService groupApprovalService;
 
     public RequestResponseDTO createRequest(
             CreateRequestDTO dto,
@@ -81,19 +82,45 @@ public class ApprovalRequestService {
 
         if (dto.getStatus() == RequestStatus.PENDING) {
             throw new BadRequestException(
-                    "Status cannot be set back to PENDING. Use APPROVED or REJECTED."
+                    "Status cannot be set back to PENDING."
             );
         }
 
-        request.setStatus(dto.getStatus());
         request.setManagerId(managerId);
+
+        if (dto.getStatus() == RequestStatus.APPROVED) {
+
+            // Save manager assignment first
+            requestRepository.save(request);
+
+            // Move request to group approval stage
+            groupApprovalService.moveToGroupApproval(request);
+
+            // Fetch updated request after group stage update
+            ApprovalRequest updatedRequest = requestRepository
+                    .findById(requestId)
+                    .orElseThrow(() ->
+                            new ResourceNotFoundException(
+                                    "Request not found with id: " + requestId
+                            )
+                    );
+
+            log.info(
+                    "Request '{}' moved to group approval stage",
+                    requestId
+            );
+
+            return toResponseDTO(updatedRequest);
+        }
+
+        // Direct rejection by manager
+        request.setStatus(RequestStatus.REJECTED);
 
         ApprovalRequest updated = requestRepository.save(request);
 
         log.info(
-                "Request '{}' updated to '{}'",
-                requestId,
-                updated.getStatus()
+                "Request '{}' rejected directly by manager",
+                requestId
         );
 
         return toResponseDTO(updated);
@@ -166,21 +193,22 @@ public class ApprovalRequestService {
         );
     }
 
-    // ── Updated: looks up employeeName from UserRepository ──────────────
     private RequestResponseDTO toResponseDTO(ApprovalRequest request) {
 
-        String employeeName = userRepository.findByUsername(request.getEmployeeId())
+        String employeeName = userRepository
+                .findByUsername(request.getEmployeeId())
                 .map(User::getName)
-                .orElse(request.getEmployeeId()); // fallback to username if not found
+                .orElse(request.getEmployeeId());
 
         return RequestResponseDTO.builder()
                 .requestId(request.getRequestId())
                 .description(request.getDescription())
                 .status(request.getStatus())
                 .employeeId(request.getEmployeeId())
-                .employeeName(employeeName)        // ← added
+                .employeeName(employeeName)
                 .managerId(request.getManagerId())
                 .createdAt(request.getCreatedAt())
+                .reviewerDecisions(request.getReviewerDecisions())
                 .build();
     }
 }

@@ -12,5 +12,6 @@ package com.approvalflow.model;
  */
 public enum Role {
     EMPLOYEE,
-    MANAGER
+    MANAGER,
+    REVIEWER
 }
