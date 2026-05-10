@@ -55,6 +55,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/requests/stats").authenticated()
                         .requestMatchers(HttpMethod.GET,  "/reviews/pending").hasRole("REVIEWER")
                         .requestMatchers(HttpMethod.GET,  "/reviews/all").hasRole("REVIEWER")
+                        .requestMatchers(HttpMethod.GET, "/reviews/history").hasRole("REVIEWER")
                         .requestMatchers(HttpMethod.POST, "/reviews/*/decision").hasRole("REVIEWER")
 
                         .anyRequest().authenticated()

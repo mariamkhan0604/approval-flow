@@ -66,4 +66,13 @@ public class GroupReviewController {
         return ResponseEntity.ok(
             groupApprovalService.submitReview(requestId, dto, authentication));
     }
+    
+    @GetMapping("/history")
+    public ResponseEntity<List<RequestResponseDTO>> getReviewHistory(
+            Authentication authentication) {
+
+        log.info("GET /reviews/history called by '{}'", authentication.getName());
+    return ResponseEntity.ok(
+        groupApprovalService.getGroupReviewHistory());
+}
 }

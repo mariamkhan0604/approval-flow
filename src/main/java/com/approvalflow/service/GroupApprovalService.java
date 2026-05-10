@@ -172,4 +172,16 @@ public class GroupApprovalService {
                 .reviewerDecisions(request.getReviewerDecisions())
                 .build();
     }
+    public List<RequestResponseDTO> getGroupReviewHistory() {
+        return requestRepository.findAll()
+                .stream()
+                .filter(r ->
+                    (r.getStatus() == RequestStatus.APPROVED ||
+                     r.getStatus() == RequestStatus.REJECTED) &&
+                    r.getReviewerDecisions() != null &&
+                    !r.getReviewerDecisions().isEmpty()
+                )
+                .map(this::toResponseDTO)
+                .collect(Collectors.toList());
+    }
 }
